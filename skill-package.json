@@ -9,22 +9,13 @@
   "skills": [
     {
       "name": "skill-package-installer",
-      "path": "skills/skill-package-installer",
-      "installer": "scripts/install.sh"
-    }
-  ],
-  "installers": [
-    {
-      "path": "scripts/install.sh",
-      "description": "Copy skill-package-installer into a target repo's .agents/skills directory after checking prerequisites.",
-      "checks_prerequisites": true
+      "path": "skills/skill-package-installer"
     }
   ],
   "executables": {
     "required": [
       {"name": "uv", "check": "uv --version"},
-      {"name": "npx", "check": "npx --version"},
-      {"name": "rsync", "check": "rsync --version"}
+      {"name": "npx", "check": "npx --version"}
     ],
     "optional": [
       {"name": "git", "check": "git --version"},
