@@ -9,22 +9,13 @@
   "skills": [
     {
       "name": "skill-package-installer",
-      "path": "skills/skill-package-installer",
-      "installer": "scripts/install.sh"
-    }
-  ],
-  "installers": [
-    {
-      "path": "scripts/install.sh",
-      "description": "Copy skill-package-installer into a target repo's .agents/skills directory after checking prerequisites.",
-      "checks_prerequisites": true
+      "path": "skills/skill-package-installer"
     }
   ],
   "executables": {
     "required": [
       {"name": "uv", "check": "uv --version"},
-      {"name": "npx", "check": "npx --version"},
-      {"name": "rsync", "check": "rsync --version"}
+      {"name": "npx", "check": "npx --version"}
     ],
     "optional": [
       {"name": "git", "check": "git --version"},
@@ -34,6 +25,29 @@
       {"name": "cx", "check": "cx --help"}
     ]
   },
+  "skill_dependencies": [
+    {
+      "name": "gest-base-workflow",
+      "required": true,
+      "description": "skill-package-installer delegates tracked VCS workflow, commits, PRs, and Gest notes to an installed Gest base skill family.",
+      "any_of": [
+        {
+          "name": "agent-gest-git-skills",
+          "repository": "rahuldave/agent_gest_git_skills",
+          "skills": ["gtw", "gsu", "gcm", "gpa"],
+          "markers": [{"skill": "gsu", "contains": "Git/GitButler"}],
+          "install": "scripts/install.sh from https://github.com/rahuldave/agent_gest_git_skills"
+        },
+        {
+          "name": "agent-gest-jj-skills",
+          "repository": "rahuldave/agent_gest_jj_skills",
+          "skills": ["gtw", "gsu", "gcm", "gpa"],
+          "markers": [{"skill": "gsu", "contains": "jj/Gest"}],
+          "install": "scripts/install.sh from https://github.com/rahuldave/agent_gest_jj_skills"
+        }
+      ]
+    }
+  ],
   "npx": {
     "supported": true,
     "install": "npx skills add rahuldave/agent_skill_package_installer -a codex --skill skill-package-installer"

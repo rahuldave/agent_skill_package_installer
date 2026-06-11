@@ -45,13 +45,20 @@ The linter checks that the manifest declares:
 
 - repository owner/name/url;
 - discoverable skills and their folders;
-- at least one installer script;
+- installer scripts when a repository installs non-skill extras;
 - required and optional executables with command checks;
+- required skill dependencies and alternatives, when the package delegates to
+  other skills;
 - an `npx skills add ...` install command when the repo is GitHub-installable.
 
-Installer scripts must check every required executable and mention optional
-executables. For example, Gest git skills declare `git`, `gest`, `just`, and
-`uv` as required, with `cx` optional for incremental build/pipeline support.
+For ordinary `skills/<name>/SKILL.md` packages, `npx skills` is the installer.
+Do not add a copy installer unless the repository also installs hooks, docs,
+templates, tools, or other extras. Installer scripts, when present, should
+report every required workflow executable and mention optional executables. For
+example, Gest git skills declare `git`, `gest`, `just`, and `uv` as required,
+with `cx` optional for incremental build/pipeline support.
+Use `--check-skill-deps` when you need to verify that declared skill
+dependencies are actually installed or available in a source checkout.
 
 ## Linter Output
 
@@ -66,6 +73,18 @@ warnings: []
 ```
 
 Use `--json` when another script needs structured output.
+
+## Skill Dependencies
+
+Read `references/skill_package_manifest.md` before adding dependencies. Use
+`skill_dependencies` for package-level dependencies on other skills. Prefer
+`any_of` when a package can work with one of several base skill families. This
+skill declares a required dependency on either `agent_gest_git_skills` or
+`agent_gest_jj_skills` because it delegates Gest tracking, commits, pushes, and
+PR review to whichever base workflow is active.
+
+For a small end-to-end example with both skill dependencies and executable
+prerequisites, read `references/hello_world_rust_tutorial.md`.
 
 ## Install Testing
 
