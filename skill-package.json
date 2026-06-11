@@ -1,0 +1,41 @@
+{
+  "schema": "https://rahuldave.github.io/agent_skill_package_installer/schema/skill-package.v1.json",
+  "version": 1,
+  "repository": {
+    "owner": "rahuldave",
+    "name": "agent_skill_package_installer",
+    "url": "https://github.com/rahuldave/agent_skill_package_installer"
+  },
+  "skills": [
+    {
+      "name": "skill-package-installer",
+      "path": "skills/skill-package-installer",
+      "installer": "scripts/install.sh"
+    }
+  ],
+  "installers": [
+    {
+      "path": "scripts/install.sh",
+      "description": "Copy skill-package-installer into a target repo's .agents/skills directory after checking prerequisites.",
+      "checks_prerequisites": true
+    }
+  ],
+  "executables": {
+    "required": [
+      {"name": "uv", "check": "uv --version"},
+      {"name": "npx", "check": "npx --version"},
+      {"name": "rsync", "check": "rsync --version"}
+    ],
+    "optional": [
+      {"name": "git", "check": "git --version"},
+      {"name": "gh", "check": "gh --version"},
+      {"name": "gest", "check": "gest --version"},
+      {"name": "just", "check": "just --version"},
+      {"name": "cx", "check": "cx --help"}
+    ]
+  },
+  "npx": {
+    "supported": true,
+    "install": "npx skills add rahuldave/agent_skill_package_installer -a codex --skill skill-package-installer"
+  }
+}

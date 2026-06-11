@@ -1,0 +1,26 @@
+{
+  "schema": "https://rahuldave.github.io/agent_skill_package_installer/schema/skill-package.v1.json",
+  "version": 1,
+  "repository": {
+    "owner": "rahuldave",
+    "name": "example_skill_repo",
+    "url": "https://github.com/rahuldave/example_skill_repo"
+  },
+  "skills": [
+    {"name": "example-skill", "path": "skills/example-skill", "installer": "scripts/install.sh"}
+  ],
+  "installers": [
+    {"path": "scripts/install.sh", "checks_prerequisites": true}
+  ],
+  "executables": {
+    "required": [
+      {"name": "uv", "check": "uv --version"},
+      {"name": "rsync", "check": "rsync --version"}
+    ],
+    "optional": [{"name": "cx", "check": "cx --help"}]
+  },
+  "npx": {
+    "supported": true,
+    "install": "npx skills add rahuldave/example_skill_repo -a codex --skill example-skill"
+  }
+}

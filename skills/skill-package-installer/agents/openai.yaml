@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Package Installer"
+  short_description: "Validate and package installable agent skill repositories."
+  default_prompt: "Validate this skill repository and produce a package plan."
