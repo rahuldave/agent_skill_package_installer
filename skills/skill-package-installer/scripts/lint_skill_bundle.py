@@ -301,6 +301,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
     skills = manifest.get("skills")
     if not isinstance(skills, list) or not skills:
         errors.append("manifest.skills must be a non-empty list")
+        declared: set[str] = set()
     else:
         names: set[str] = set()
         for index, skill in enumerate(skills):
@@ -341,9 +342,9 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
             for link in local_markdown_links(text):
                 if not (skill_dir / link).exists():
                     errors.append(f"{name}: SKILL.md link does not resolve: {link}")
+        declared = names
 
     discovered = {name for name, _ in discover_skills(root)}
-    declared = {skill.get("name") for skill in skills if isinstance(skill, dict)} if isinstance(skills, list) else set()
     missing_from_manifest = sorted(name for name in discovered if name not in declared)
     if missing_from_manifest:
         warnings.append(f"discovered skills not declared in manifest: {', '.join(missing_from_manifest)}")
@@ -360,6 +361,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
         installers = []
     if not installers and not npx_supported:
         errors.append("manifest.installers must be non-empty when npx.supported is false")
+    validate_installer_skill(manifest, declared, errors, warnings)
     executables = manifest.get("executables")
     required_execs = executable_entries(executables, "required", errors)
     optional_execs = executable_entries(executables, "optional", errors)
@@ -404,6 +406,37 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
     else:
         warnings.append("manifest.npx install command is missing")
     return validate_skill_dependencies(root, manifest, errors, warnings, check_skill_deps)
+
+
+def validate_installer_skill(
+    manifest: dict[str, Any],
+    declared_skills: set[str],
+    errors: list[str],
+    warnings: list[str],
+) -> dict[str, Any]:
+    installer_skill = manifest.get("installer_skill") if isinstance(manifest, dict) else None
+    if installer_skill in (None, {}):
+        return {}
+    if not isinstance(installer_skill, dict):
+        errors.append("manifest.installer_skill must be an object when present")
+        return {}
+    name = installer_skill.get("name")
+    if not isinstance(name, str) or not name:
+        errors.append("manifest.installer_skill.name is required")
+        return {}
+    if name not in declared_skills:
+        errors.append(f"manifest.installer_skill.name is not a declared skill: {name}")
+    installs = installer_skill.get("installs", [])
+    if not isinstance(installs, list) or not all(isinstance(item, str) for item in installs):
+        errors.append("manifest.installer_skill.installs must be a string list when present")
+        installs = []
+    requires_approval = installer_skill.get("requires_approval")
+    if requires_approval is not None and not isinstance(requires_approval, bool):
+        errors.append("manifest.installer_skill.requires_approval must be boolean when present")
+    risky = {"agents", "agents-md", "hooks", "templates", "tools"}
+    if risky.intersection(installs) and requires_approval is not True:
+        warnings.append(f"installer skill {name} installs repo files; set requires_approval true")
+    return {"name": name, "installs": installs, "requires_approval": requires_approval}
 
 
 def executable_entries(executables: Any, key: str, errors: list[str]) -> list[dict[str, str]]:
@@ -476,6 +509,7 @@ def build_result(root: Path, run_checks: bool, check_skill_deps: bool = False) -
         "warnings": warnings,
         "prereqs": prereq_results,
         "skill_dependencies": skill_dependency_status,
+        "installer_skill": manifest.get("installer_skill", {}) if isinstance(manifest, dict) else {},
     }
 
 
@@ -504,6 +538,9 @@ def emit_text(result: dict[str, Any]) -> None:
         print("skill_dependencies:")
         for dependency in result["skill_dependencies"]:
             print(f"  - {dependency['name']}: {dependency['status']}")
+    if result.get("installer_skill"):
+        print("installer_skill:")
+        print(f"  name: {result['installer_skill'].get('name', '')}")
     print(BLOCK_END)
 
 
@@ -530,10 +567,21 @@ def emit_plan(result: dict[str, Any]) -> None:
     npx = manifest.get("npx", {}) if isinstance(manifest, dict) else {}
     print("npx:")
     print(f"  command: {npx.get('install', '')}")
+    print("installer_skill:")
+    installer_skill = manifest.get("installer_skill", {}) if isinstance(manifest, dict) else {}
+    if installer_skill:
+        print(f"  name: {installer_skill.get('name', '')}")
+        installs = ", ".join(installer_skill.get("installs", []))
+        print(f"  installs: {installs}")
+    else:
+        print("  []")
     print("skill_dependencies:")
-    for dependency in result.get("skill_dependencies", []):
+    skill_dependencies = result.get("skill_dependencies", [])
+    for dependency in skill_dependencies:
         print(f"  - name: {dependency['name']}")
         print(f"    status: {dependency['status']}")
+    if not skill_dependencies:
+        print("  []")
     print("lint:")
     print(f"  status: {result['status']}")
     print(f"  error_count: {len(result['errors'])}")

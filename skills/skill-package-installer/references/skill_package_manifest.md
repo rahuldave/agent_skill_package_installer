@@ -16,8 +16,15 @@ Minimal shape:
     "url": "https://github.com/rahuldave/example_skill_repo"
   },
   "skills": [
-    {"name": "example-skill", "path": "skills/example-skill"}
+    {"name": "example-skill", "path": "skills/example-skill"},
+    {"name": "example_installer", "path": "skills/example_installer"}
   ],
+  "installer_skill": {
+    "name": "example_installer",
+    "description": "Optional post-install installer skill for hooks, templates, or tools.",
+    "installs": ["hooks", "templates"],
+    "requires_approval": true
+  },
   "executables": {
     "required": [
       {"name": "uv", "check": "uv --version"}
@@ -50,7 +57,7 @@ Minimal shape:
   ],
   "npx": {
     "supported": true,
-    "install": "npx skills add rahuldave/example_skill_repo -a codex --skill example-skill"
+    "install": "npx skills add rahuldave/example_skill_repo -a codex --skill example-skill --skill example_installer"
   }
 }
 ```
@@ -61,11 +68,18 @@ Rules:
 - `repository.owner`, `repository.name`, and `repository.url` are required.
 - Every `skills[].path` must contain a `SKILL.md`.
 - `skills[].name` must match the `name` in that `SKILL.md` frontmatter.
-- `npx skills` is the normal installer for pure skill packages, so
+- `npx skills` is the normal installer for skill packages, so
   `installers[]` is optional when `"npx": {"supported": true}`.
+- Hooks, docs, templates, tools, and other non-skill extras should be installed
+  through the package's explicit installer skill after `npx skills add`, not as
+  a hidden side effect of installing the skill set.
+- Use `installer_skill` to name the one installed skill that performs that
+  post-install setup. Prefer names like `blah_installer` for the `blah` package.
+  If the installer skill installs hooks, AGENTS guidance, templates, or tools,
+  set `requires_approval: true`.
 - At least one `installers[]` entry is required only for repos that set
-  `npx.supported` to `false` or that intentionally copy hooks, docs, templates,
-  extras, tools, or project-local skill bundles outside the `npx skills` path.
+  `npx.supported` to `false` or that intentionally support source-checkout
+  installation outside the `npx skills` path.
 - Installers must set `checks_prerequisites: true` and report all required
   workflow executables. Missing workflow tools should produce clear guidance,
   not prevent the skill bundle itself from being installed.
@@ -76,6 +90,16 @@ Rules:
   use them.
 - Repos installed only by their own copy-based installer may set
   `"npx": {"supported": false, "reason": "copy-based installer"}`.
+
+Installer skill:
+
+- An installer skill is a normal skill installed by `npx skills add`.
+- The user or agent invokes it after installation to copy hooks, templates,
+  tools, AGENTS snippets, or other repo extras.
+- The installer skill should keep scripts and templates under its own skill
+  resources, such as `scripts/` and `assets/`.
+- The installer skill should ask before overwriting user files and should
+  re-check any executables it needs at use time.
 
 Skill dependencies:
 

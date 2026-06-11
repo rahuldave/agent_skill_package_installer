@@ -2,7 +2,7 @@
 
 Standalone repository for the `skill-package-installer` agent skill. The skill
 validates installable skill repositories, checks their package manifests,
-confirms installer scripts declare prerequisite executable checks, checks
+confirms the package installer skill and installer scripts are declared correctly, checks
 declared skill dependencies when asked, and emits a package plan before
 publication.
 
@@ -10,9 +10,9 @@ The only assumed runtime for the bundled linter is `uv`; `uv run python ...`
 pulls or selects Python from this repository's `.python-version` and uses only
 the Python standard library.
 
-The copy-based installer does not fail just because workflow prerequisites are
-missing. It installs the skill and prints missing-tool guidance; commands that
-actually need `uv`, `npx`, Gest, or another tool should re-check at use time.
+This skill has no required dependency on the Gest git/GitButler or jj skill
+families. If those skills are installed, use them for tracked development,
+commits, and PR review; the package linter itself remains standalone.
 
 Install with `npx skills`:
 
@@ -31,6 +31,11 @@ copy installer because it does not install hooks, project templates, or other
 non-skill extras. The manifest still declares executables so the linter can
 report missing tools before someone tries a workflow that needs them.
 
+For packages that do install hooks or repo templates, publish an explicit
+installer skill in the same skill set, such as `blah_installer` for a `blah`
+package. Users first run `npx skills add ...`, then invoke that installer skill
+to install hooks with clear approval and missing-tool guidance.
+
 To verify required skill dependencies against local source or installed skill
 roots, pass a path-list to `dependency-check`:
 
@@ -38,7 +43,7 @@ roots, pass a path-list to `dependency-check`:
 just dependency-check . "/Users/rahul/Projects/agent_gest_git_skills/.agents/skills:/Users/rahul/Projects/agent_gest_jj_skills/.agents/skills"
 ```
 
-For a concrete dependency example, see
+For concrete examples, see
 `skills/skill-package-installer/references/hello_world_rust_tutorial.md`. It
 walks through a tiny `hello-rust` skill that depends on a Gest base skill family
-and a local Rust toolchain.
+and a local Rust toolchain, plus an installer-skill pattern for hooks.

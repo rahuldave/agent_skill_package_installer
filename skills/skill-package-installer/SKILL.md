@@ -11,8 +11,8 @@ is committed, pushed, or installed with `npx skills`.
 ## Workflow
 
 1. Inspect the target repo for `skill-package.json`, `skills/*/SKILL.md`,
-   `.agents/skills/*/SKILL.md`, `scripts/install.sh`, docs, references,
-   assets, and Just targets.
+   `.agents/skills/*/SKILL.md`, installer skills, docs, references, assets, and
+   Just targets.
 2. Require `uv` for the linter runtime. The linter is Python-only and uses the
    standard library, so `uv run python ...` can supply Python without an
    additional language install.
@@ -45,6 +45,8 @@ The linter checks that the manifest declares:
 
 - repository owner/name/url;
 - discoverable skills and their folders;
+- the package installer skill users invoke after `npx skills add` to install hooks,
+  templates, docs, or tools;
 - installer scripts when a repository installs non-skill extras;
 - required and optional executables with command checks;
 - required skill dependencies and alternatives, when the package delegates to
@@ -52,8 +54,11 @@ The linter checks that the manifest declares:
 - an `npx skills add ...` install command when the repo is GitHub-installable.
 
 For ordinary `skills/<name>/SKILL.md` packages, `npx skills` is the installer.
-Do not add a copy installer unless the repository also installs hooks, docs,
-templates, tools, or other extras. Installer scripts, when present, should
+Do not add an implicit copy installer for hooks. Instead, include one explicit
+installer skill in the skill set, such as `blah_installer` for a `blah` package;
+after `npx skills add` installs the skills, the user can ask that installer
+skill to install hooks, docs, templates, tools, or other extras.
+Installer scripts, when present for source-checkout or non-npx setup, should
 report every required workflow executable and mention optional executables. For
 example, Gest git skills declare `git`, `gest`, `just`, and `uv` as required,
 with `cx` optional for incremental build/pipeline support.
@@ -79,9 +84,8 @@ Use `--json` when another script needs structured output.
 Read `references/skill_package_manifest.md` before adding dependencies. Use
 `skill_dependencies` for package-level dependencies on other skills. Prefer
 `any_of` when a package can work with one of several base skill families. This
-skill declares a required dependency on either `agent_gest_git_skills` or
-`agent_gest_jj_skills` because it delegates Gest tracking, commits, pushes, and
-PR review to whichever base workflow is active.
+skill itself is standalone and does not require the Gest git/GitButler or jj
+skill family; use those only as optional development workflow helpers.
 
 For a small end-to-end example with both skill dependencies and executable
 prerequisites, read `references/hello_world_rust_tutorial.md`.

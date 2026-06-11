@@ -11,6 +11,10 @@ The skill is intentionally silly: it only prints a Rust hello-world program and
 checks that Cargo is available. It is useful because the dependency behavior is
 easy to see.
 
+It does not need hooks. A hook-installing package should use the same install
+flow, but include a second normal skill such as `hello_rust_installer` that the
+user invokes after `npx skills add`.
+
 ## Install-Time Behavior
 
 `npx skills add owner/repo -a codex --skill hello-rust` installs the skill
@@ -189,3 +193,45 @@ npx skills add rahuldave/hello-rust-skill -a codex --skill hello-rust
 If `cargo` or `rustc` is missing, `npx skills add` may still install the skill.
 That is fine. The lint step reports missing prerequisites for packagers, and the
 runtime helper script prints missing-tool guidance when invoked.
+
+## Optional Hook Installer Skill
+
+If the package also needs hooks, add a second skill instead of relying on a
+hidden install side effect:
+
+```text
+hello-rust-skill/
+  skills/
+    hello-rust/
+      SKILL.md
+      scripts/
+        hello_rust.py
+    hello_rust_installer/
+      SKILL.md
+      assets/
+        hooks/
+      scripts/
+        install_hooks.py
+```
+
+The installer skill is installed by the same `npx skills add` command as the
+main skill. Later, the user asks the agent to use `hello_rust_installer`; that
+installer skill can then copy hook files from its own `assets/` directory, ask
+before overwriting project files, and re-check any executables it needs.
+
+Manifest fragment:
+
+```json
+{
+  "skills": [
+    {"name": "hello-rust", "path": "skills/hello-rust"},
+    {"name": "hello_rust_installer", "path": "skills/hello_rust_installer"}
+  ],
+  "installer_skill": {
+    "name": "hello_rust_installer",
+    "description": "Optional post-install setup for hooks.",
+    "installs": ["hooks"],
+    "requires_approval": true
+  }
+}
+```

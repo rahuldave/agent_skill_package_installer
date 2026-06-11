@@ -7,8 +7,15 @@
     "url": "https://github.com/rahuldave/example_skill_repo"
   },
   "skills": [
-    {"name": "example-skill", "path": "skills/example-skill"}
+    {"name": "example-skill", "path": "skills/example-skill"},
+    {"name": "example_installer", "path": "skills/example_installer"}
   ],
+  "installer_skill": {
+    "name": "example_installer",
+    "description": "Optional post-install setup for hooks, templates, or tools.",
+    "installs": ["hooks", "templates"],
+    "requires_approval": true
+  },
   "executables": {
     "required": [
       {"name": "uv", "check": "uv --version"}
