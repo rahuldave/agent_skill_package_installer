@@ -5,8 +5,11 @@ description: Validate and package installable agent skill repositories. Use when
 
 # Skill Package Installer
 
-Use this skill to make a skill repository installable and auditable before it
-is committed, pushed, or installed with `npx skills`.
+Use this authoring skill to make a skill repository installable and auditable
+before it is committed, pushed, or installed with `npx skills`. This skill is
+for package maintainers. End users of a finished package install that package
+directly and then invoke the package's own installer skill for hooks, templates,
+docs, tools, or other non-skill extras.
 
 ## Workflow
 
@@ -45,19 +48,23 @@ The linter checks that the manifest declares:
 
 - repository owner/name/url;
 - discoverable skills and their folders;
-- the package installer skill users invoke after `npx skills add` to install hooks,
-  templates, docs, or tools;
+- the package-specific installer skill users invoke after `npx skills add` to
+  install hooks, templates, docs, or tools;
 - installer scripts when a repository installs non-skill extras;
 - required and optional executables with command checks;
 - required skill dependencies and alternatives, when the package delegates to
   other skills;
 - an `npx skills add ...` install command when the repo is GitHub-installable.
 
-For ordinary `skills/<name>/SKILL.md` packages, `npx skills` is the installer.
-Do not add an implicit copy installer for hooks. Instead, include one explicit
-installer skill in the skill set, such as `blah_installer` for a `blah` package;
-after `npx skills add` installs the skills, the user can ask that installer
-skill to install hooks, docs, templates, tools, or other extras.
+For ordinary `skills/<name>/SKILL.md` or `.agents/skills/<name>/SKILL.md`
+packages, `npx skills` is the skill installer. Do not add an implicit hook
+postinstall. Instead, include one explicit installer skill in the skill set,
+such as `blah_installer` for a `blah` package; after `npx skills add` installs
+the skills, the user can ask that installer skill to install hooks, docs,
+templates, tools, or other extras.
+Because `npx skills` installs only selected skill folders, any post-npx
+installer skill must carry its own scripts/assets or intentionally fetch the
+package repository before running repo-level installers.
 Installer scripts, when present for source-checkout or non-npx setup, should
 report every required workflow executable and mention optional executables. For
 example, Gest git skills declare `git`, `gest`, `just`, and `uv` as required,

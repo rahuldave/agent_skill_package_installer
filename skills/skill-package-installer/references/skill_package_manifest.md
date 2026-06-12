@@ -1,8 +1,8 @@
 # Skill Package Manifest
 
-`skill-package.json` is the package-installer source of truth. Keep it small,
+`skill-package.json` is the package-authoring source of truth. Keep it small,
 checked into the repository root, and update it whenever skills, installer
-scripts, or executable prerequisites change.
+skills, installer scripts, or executable prerequisites change.
 
 Minimal shape:
 
@@ -43,14 +43,14 @@ Minimal shape:
           "repository": "rahuldave/agent_gest_git_skills",
           "skills": ["gtw", "gsu", "gcm", "gpa"],
           "markers": [{"skill": "gsu", "contains": "Git/GitButler"}],
-          "install": "scripts/install.sh from https://github.com/rahuldave/agent_gest_git_skills"
+          "install": "npx skills add rahuldave/agent_gest_git_skills -a codex --skill '*' -y, then invoke gest_git_installer for hooks/extras"
         },
         {
           "name": "agent-gest-jj-skills",
           "repository": "rahuldave/agent_gest_jj_skills",
           "skills": ["gtw", "gsu", "gcm", "gpa"],
           "markers": [{"skill": "gsu", "contains": "jj/Gest"}],
-          "install": "scripts/install.sh from https://github.com/rahuldave/agent_gest_jj_skills"
+          "install": "npx skills add rahuldave/agent_gest_jj_skills -a codex --skill '*' -y, then invoke gest_jj_installer for hooks/extras"
         }
       ]
     }
@@ -68,6 +68,8 @@ Rules:
 - `repository.owner`, `repository.name`, and `repository.url` are required.
 - Every `skills[].path` must contain a `SKILL.md`.
 - `skills[].name` must match the `name` in that `SKILL.md` frontmatter.
+- `SKILL.md` frontmatter must parse as YAML as used by `npx skills`; quote or
+  rewrite values containing `: `.
 - `npx skills` is the normal installer for skill packages, so
   `installers[]` is optional when `"npx": {"supported": true}`.
 - Hooks, docs, templates, tools, and other non-skill extras should be installed
@@ -97,7 +99,9 @@ Installer skill:
 - The user or agent invokes it after installation to copy hooks, templates,
   tools, AGENTS snippets, or other repo extras.
 - The installer skill should keep scripts and templates under its own skill
-  resources, such as `scripts/` and `assets/`.
+  resources, such as `scripts/` and `assets/`, or clearly fetch the package
+  repository before invoking repo-level installers. `npx skills` does not copy
+  arbitrary root-level repository scripts into the installed skill folder.
 - The installer skill should ask before overwriting user files and should
   re-check any executables it needs at use time.
 

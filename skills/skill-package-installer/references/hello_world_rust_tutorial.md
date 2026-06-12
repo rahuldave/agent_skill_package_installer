@@ -5,7 +5,8 @@ This tutorial builds a deliberately tiny skill package that depends on:
 - a Gest base skill family, either `rahuldave/agent_gest_git_skills` or
   `rahuldave/agent_gest_jj_skills`;
 - a local Rust toolchain, represented by `cargo` and `rustc`;
-- `uv`, so package linting can run with a managed Python runtime.
+- `uv`, so package authors can run the package linter with a managed Python
+  runtime.
 
 The skill is intentionally silly: it only prints a Rust hello-world program and
 checks that Cargo is available. It is useful because the dependency behavior is
@@ -17,9 +18,9 @@ user invokes after `npx skills add`.
 
 ## Install-Time Behavior
 
-`npx skills add owner/repo -a codex --skill hello-rust` installs the skill
-bundle. It should not be treated as a dependency gate because it installs skill
-files; it does not install or validate the user's Rust toolchain for you.
+`npx skills add owner/repo -a codex --skill hello-rust` installs the published
+skill bundle. It should not be treated as a dependency gate because it installs
+skill files; it does not install or validate the user's Rust toolchain for you.
 
 For best user experience:
 
@@ -143,14 +144,14 @@ Create `skill-package.json`:
           "repository": "rahuldave/agent_gest_git_skills",
           "skills": ["gtw", "gsu", "gcm", "gpa"],
           "markers": [{"skill": "gsu", "contains": "Git/GitButler"}],
-          "install": "scripts/install.sh from https://github.com/rahuldave/agent_gest_git_skills"
+          "install": "npx skills add rahuldave/agent_gest_git_skills -a codex --skill '*' -y, then invoke gest_git_installer for hooks/extras"
         },
         {
           "name": "agent-gest-jj-skills",
           "repository": "rahuldave/agent_gest_jj_skills",
           "skills": ["gtw", "gsu", "gcm", "gpa"],
           "markers": [{"skill": "gsu", "contains": "jj/Gest"}],
-          "install": "scripts/install.sh from https://github.com/rahuldave/agent_gest_jj_skills"
+          "install": "npx skills add rahuldave/agent_gest_jj_skills -a codex --skill '*' -y, then invoke gest_jj_installer for hooks/extras"
         }
       ]
     }
@@ -184,7 +185,7 @@ SKILL_PACKAGE_DEPENDENCY_PATHS="/Users/rahul/Projects/agent_gest_git_skills/.age
   uv run python /path/to/agent_skill_package_installer/skills/skill-package-installer/scripts/lint_skill_bundle.py --check-skill-deps .
 ```
 
-Install with `npx skills`:
+End users install the finished package with `npx skills`:
 
 ```bash
 npx skills add rahuldave/hello-rust-skill -a codex --skill hello-rust
@@ -215,9 +216,11 @@ hello-rust-skill/
 ```
 
 The installer skill is installed by the same `npx skills add` command as the
-main skill. Later, the user asks the agent to use `hello_rust_installer`; that
-installer skill can then copy hook files from its own `assets/` directory, ask
-before overwriting project files, and re-check any executables it needs.
+main skill when the package author publishes both skills, for example with
+`--skill '*'` or explicit `--skill hello-rust --skill hello_rust_installer`.
+Later, the user asks the agent to use `hello_rust_installer`; that installer
+skill can then copy hook files from its own `assets/` directory, ask before
+overwriting project files, and re-check any executables it needs.
 
 Manifest fragment:
 

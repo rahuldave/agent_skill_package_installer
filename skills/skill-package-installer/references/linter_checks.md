@@ -14,8 +14,10 @@ Checks performed:
 - manifest has version, repository, skills, executables, and npx install fields
   where appropriate;
 - every declared skill path exists and contains `SKILL.md`;
-- `SKILL.md` has frontmatter with matching `name` and a non-placeholder
-  `description`;
+- `SKILL.md` has YAML-parseable frontmatter with matching `name` and a
+  non-placeholder `description`;
+- unquoted frontmatter scalar values do not contain `: `, which would make
+  `npx skills` skip the skill;
 - duplicate skill names are rejected;
 - hidden second-tier skill hierarchies under a skill folder are rejected;
 - markdown links to local references/scripts/assets from `SKILL.md` resolve;
