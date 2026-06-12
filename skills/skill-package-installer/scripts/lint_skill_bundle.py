@@ -88,7 +88,10 @@ def parse_frontmatter(skill_md: Path, errors: list[str]) -> dict[str, str]:
             errors.append(f"{skill_md}: unsupported frontmatter line: {line}")
             continue
         key, value = line.split(":", 1)
-        value = value.strip().strip('"').strip("'")
+        raw_value = value.strip()
+        if raw_value and not raw_value.startswith(("'", '"', "|", ">")) and ": " in raw_value:
+            errors.append(f"{skill_md}: frontmatter value for {key.strip()} contains ': ' and must be quoted or rewritten")
+        value = raw_value.strip('"').strip("'")
         fields[key.strip()] = value
     return fields
 
@@ -299,6 +302,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
                 errors.append(f"manifest.repository.{key} is required")
 
     skills = manifest.get("skills")
+    skill_paths: dict[str, Path] = {}
     if not isinstance(skills, list) or not skills:
         errors.append("manifest.skills must be a non-empty list")
         declared: set[str] = set()
@@ -324,6 +328,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
             if not skill_md.exists():
                 errors.append(f"declared skill {name} missing {path_value}/SKILL.md")
                 continue
+            skill_paths[name] = skill_dir
             frontmatter = parse_frontmatter(skill_md, errors)
             if frontmatter.get("name") != name:
                 errors.append(f"{rel(skill_md, root)} frontmatter name does not match manifest skill {name}")
@@ -350,8 +355,8 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
         warnings.append(f"discovered skills not declared in manifest: {', '.join(missing_from_manifest)}")
     npx = manifest.get("npx") if isinstance(manifest, dict) else None
     npx_supported = isinstance(npx, dict) and npx.get("supported") is not False
-    if npx_supported and not (root / "skills").is_dir():
-        warnings.append("repo has no top-level skills/ directory; npx skills may not discover .agents/skills-only repos")
+    if npx_supported and not ((root / "skills").is_dir() or (root / ".agents" / "skills").is_dir() or (root / "SKILL.md").exists()):
+        errors.append("npx.supported is true but no npx-discoverable skill path exists")
 
     installers = manifest.get("installers", [])
     if installers is None:
@@ -361,7 +366,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
         installers = []
     if not installers and not npx_supported:
         errors.append("manifest.installers must be non-empty when npx.supported is false")
-    validate_installer_skill(manifest, declared, errors, warnings)
+    validate_installer_skill(manifest, declared, skill_paths, errors, warnings)
     executables = manifest.get("executables")
     required_execs = executable_entries(executables, "required", errors)
     optional_execs = executable_entries(executables, "optional", errors)
@@ -411,6 +416,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
 def validate_installer_skill(
     manifest: dict[str, Any],
     declared_skills: set[str],
+    skill_paths: dict[str, Path],
     errors: list[str],
     warnings: list[str],
 ) -> dict[str, Any]:
@@ -436,6 +442,14 @@ def validate_installer_skill(
     risky = {"agents", "agents-md", "hooks", "templates", "tools"}
     if risky.intersection(installs) and requires_approval is not True:
         warnings.append(f"installer skill {name} installs repo files; set requires_approval true")
+    skill_dir = skill_paths.get(name)
+    if installs and skill_dir is not None:
+        support_files = [path for path in skill_dir.rglob("*") if path.is_file() and path.name != "SKILL.md"]
+        if not support_files:
+            errors.append(
+                f"installer skill {name} declares installs but has no bundled support files; "
+                "npx skills installs only the skill folder"
+            )
     return {"name": name, "installs": installs, "requires_approval": requires_approval}
 
 
