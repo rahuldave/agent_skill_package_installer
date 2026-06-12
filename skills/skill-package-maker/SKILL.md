@@ -12,6 +12,13 @@ End users of a finished package install that package directly and then invoke
 the package's own installer skill for hooks, templates, docs, tools, or other
 non-skill extras.
 
+For a package author, the friendly path is:
+
+1. Add or update `skill-package.json`.
+2. Run the linter and package plan from this skill.
+3. Fix manifest, installer-skill, dependency, or prerequisite messages.
+4. Run the scratch install test before publishing.
+
 ## Workflow
 
 1. Inspect the target repo for `skill-package.json`, `skills/*/SKILL.md`,
