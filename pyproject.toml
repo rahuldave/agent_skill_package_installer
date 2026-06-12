@@ -1,5 +1,5 @@
 [project]
-name = "agent-skill-package-installer"
+name = "agent-skill-package-maker"
 version = "0.1.0"
 description = "Agent skill repository packaging and installability checks."
 requires-python = ">=3.12"
