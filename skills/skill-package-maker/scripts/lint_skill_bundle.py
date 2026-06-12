@@ -36,6 +36,11 @@ KNOWN_EXECUTABLES = {
     "rustup",
     "uv",
 }
+SKILL_LOCAL_PREFIXES = ("assets/", "references/", "scripts/")
+REPO_ROOT_RUNTIME_PREFIXES = ("docs/", "templates/", "tools/")
+INLINE_PATH_RE = re.compile(
+    r"`((?:assets|docs|references|scripts|templates|tools)/[A-Za-z0-9_./-]+)`"
+)
 
 
 def parse_args() -> argparse.Namespace:
@@ -115,6 +120,73 @@ def local_markdown_links(text: str) -> list[str]:
             continue
         result.append(target)
     return result
+
+
+def inline_local_paths(text: str) -> list[str]:
+    return [match.group(1) for match in INLINE_PATH_RE.finditer(text)]
+
+
+def validate_skill_file_references(
+    skill_name: str,
+    skill_dir: Path,
+    text: str,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    for link in local_markdown_links(text):
+        if not (skill_dir / link).exists():
+            errors.append(f"{skill_name}: SKILL.md link does not resolve: {link}")
+    for path_value in inline_local_paths(text):
+        if path_value.startswith(REPO_ROOT_RUNTIME_PREFIXES):
+            errors.append(
+                f"{skill_name}: SKILL.md references repo-root runtime file {path_value}; "
+                "bundle installed-skill support material under references/, scripts/, or assets/"
+            )
+        if path_value.startswith(SKILL_LOCAL_PREFIXES) and not (skill_dir / path_value).exists():
+            errors.append(f"{skill_name}: SKILL.md bundled resource does not resolve: {path_value}")
+
+    references_dir = skill_dir / "references"
+    if references_dir.is_dir():
+        for reference in sorted(references_dir.glob("*.md")):
+            validate_reference_file(skill_name, skill_dir, reference, errors, warnings)
+
+    for nested_reference in sorted(skill_dir.glob("references/**/*.md")):
+        if nested_reference.parent == references_dir:
+            continue
+        warnings.append(
+            f"{skill_name}: nested reference file is deeper than one level from SKILL.md: "
+            f"{nested_reference.relative_to(skill_dir).as_posix()}"
+        )
+
+
+def validate_reference_file(
+    skill_name: str,
+    skill_dir: Path,
+    reference: Path,
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    text = reference.read_text(encoding="utf-8")
+    rel_reference = reference.relative_to(skill_dir).as_posix()
+    for link in local_markdown_links(text):
+        if not (reference.parent / link).exists():
+            errors.append(f"{skill_name}: {rel_reference} link does not resolve: {link}")
+    for path_value in inline_local_paths(text):
+        if path_value.startswith("docs/"):
+            errors.append(
+                f"{skill_name}: {rel_reference} references repo-root docs path {path_value}; "
+                "copy the reference closure under this skill's references/ and use sibling links"
+            )
+        elif path_value.startswith(("templates/", "tools/")):
+            warnings.append(
+                f"{skill_name}: {rel_reference} mentions repo-root path {path_value}; "
+                "move installed runtime material under the skill when it is required"
+            )
+        elif path_value.startswith("scripts/") and (skill_dir / path_value).exists():
+            warnings.append(
+                f"{skill_name}: {rel_reference} mentions bundled script as {path_value}; "
+                f"use ../{path_value} for a Markdown-relative path from references/"
+            )
 
 
 def command_mentions(script_text: str, name: str) -> bool:
@@ -344,9 +416,7 @@ def validate_manifest(root: Path, manifest: dict[str, Any], errors: list[str], w
                     continue
                 errors.append(f"{name}: hidden nested skill hierarchy at {rel(nested, root)}")
             text = skill_md.read_text(encoding="utf-8")
-            for link in local_markdown_links(text):
-                if not (skill_dir / link).exists():
-                    errors.append(f"{name}: SKILL.md link does not resolve: {link}")
+            validate_skill_file_references(name, skill_dir, text, errors, warnings)
         declared = names
 
     discovered = {name for name, _ in discover_skills(root)}

@@ -75,6 +75,16 @@ Rules:
 - Hooks, docs, templates, tools, and other non-skill extras should be installed
   through the package's explicit installer skill after `npx skills add`, not as
   a hidden side effect of installing the skill set.
+- Runtime support material required by a skill should live inside that skill.
+  Copy the full reference closure each skill needs under its own
+  `references/`, copy executable helpers under its own `scripts/`, and keep
+  generated output resources under `assets/`. In `SKILL.md`, refer to those
+  files as `references/foo.md`, `scripts/foo.sh`, or `assets/foo.ext`; do not
+  point installed skills at repo-root `docs/`, `templates/`, or `tools/`.
+- When a copied reference file links to another copied reference file, keep the
+  files together and use sibling links such as `other_reference.md`. If a
+  reference file needs to point at a bundled script, use a real relative path
+  such as `../scripts/helper.sh`.
 - Use `installer_skill` to name the one installed skill that performs that
   post-install setup. Prefer names like `blah_installer` for the `blah` package.
   If the installer skill installs hooks, AGENTS guidance, templates, or tools,

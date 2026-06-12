@@ -63,6 +63,10 @@ The linter checks that the manifest declares:
 - required skill dependencies and alternatives, when the package delegates to
   other skills;
 - an `npx skills add ...` install command when the repo is GitHub-installable.
+- skill-local runtime references: `SKILL.md` should point to bundled
+  `references/`, `scripts/`, or `assets/` files, not repo-root `docs/`,
+  `templates/`, or `tools/` paths. Copy the full reference closure into each
+  skill that needs it.
 
 For ordinary `skills/<name>/SKILL.md` or `.agents/skills/<name>/SKILL.md`
 packages, `npx skills` is the skill installer. Do not add an implicit hook
