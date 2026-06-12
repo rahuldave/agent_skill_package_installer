@@ -1,10 +1,10 @@
 {
-  "schema": "https://rahuldave.github.io/agent_skill_package_installer/schema/skill-package.v1.json",
+  "schema": "https://rahuldave.github.io/agent_skill_package_maker/schema/skill-package.v1.json",
   "version": 1,
   "repository": {
     "owner": "rahuldave",
-    "name": "agent_skill_package_installer",
-    "url": "https://github.com/rahuldave/agent_skill_package_installer"
+    "name": "agent_skill_package_maker",
+    "url": "https://github.com/rahuldave/agent_skill_package_maker"
   },
   "skills": [
     {
@@ -27,6 +27,6 @@
   },
   "npx": {
     "supported": true,
-    "install": "npx skills add rahuldave/agent_skill_package_installer -g -a codex --skill skill-package-maker -y"
+    "install": "npx skills add rahuldave/agent_skill_package_maker -g -a codex --skill skill-package-maker -y"
   }
 }

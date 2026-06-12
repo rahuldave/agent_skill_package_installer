@@ -8,7 +8,7 @@ Minimal shape:
 
 ```json
 {
-  "schema": "https://rahuldave.github.io/agent_skill_package_installer/schema/skill-package.v1.json",
+  "schema": "https://rahuldave.github.io/agent_skill_package_maker/schema/skill-package.v1.json",
   "version": 1,
   "repository": {
     "owner": "rahuldave",

@@ -19,7 +19,7 @@ Package authors can install this builder skill globally for Codex with
 `npx skills`:
 
 ```bash
-npx skills add rahuldave/agent_skill_package_installer -g -a codex --skill skill-package-maker -y
+npx skills add rahuldave/agent_skill_package_maker -g -a codex --skill skill-package-maker -y
 ```
 
 Local verification:
