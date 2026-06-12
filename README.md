@@ -7,6 +7,11 @@ confirms package-specific installer skills and installer scripts are declared
 correctly, checks declared skill dependencies when asked, and emits a package
 plan before publication.
 
+If you are creating or maintaining a skill package, install this once in Codex
+and use it whenever you want to check that a package is ready to publish. If you
+are just installing someone else's finished skills, skip this repository and
+install that finished package directly.
+
 The only assumed runtime for the bundled linter is `uv`; `uv run python ...`
 pulls or selects Python from this repository's `.python-version` and uses only
 the Python standard library.
@@ -19,10 +24,14 @@ Package authors can install this builder skill globally for Codex with
 `npx skills`:
 
 ```bash
-npx skills add rahuldave/agent_skill_package_installer -g -a codex --skill skill-package-maker -y
+npx skills add rahuldave/agent_skill_package_maker -g -a codex --skill skill-package-maker -y
 ```
 
-Local verification:
+After that, ask Codex to use `skill-package-maker` inside the skill repository
+you are building. The usual loop is: lint the package, fix any manifest or
+installer issues, run a scratch `npx skills` install test, then publish.
+
+Local verification for this repository:
 
 ```bash
 just verify
