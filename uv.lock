@@ -3,6 +3,6 @@ revision = 3
 requires-python = ">=3.12"
 
 [[package]]
-name = "agent-skill-package-installer"
+name = "agent-skill-package-maker"
 version = "0.1.0"
 source = { virtual = "." }

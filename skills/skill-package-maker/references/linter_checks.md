@@ -4,7 +4,7 @@
 `uv` so the user only needs `uv` installed:
 
 ```bash
-uv run python skills/skill-package-installer/scripts/lint_skill_bundle.py .
+uv run python skills/skill-package-maker/scripts/lint_skill_bundle.py .
 ```
 
 Checks performed:

@@ -1,6 +1,6 @@
-# Agent Skill Package Installer
+# Agent Skill Package Maker
 
-Standalone repository for the `skill-package-installer` authoring skill. This
+Standalone repository for the `skill-package-maker` authoring skill. This
 is for package maintainers, not for end users of a published skill package. The
 skill validates installable skill repositories, checks their package manifests,
 confirms package-specific installer skills and installer scripts are declared
@@ -15,10 +15,11 @@ This skill has no required dependency on the Gest git/GitButler or jj skill
 families. If those skills are installed, use them for tracked development,
 commits, and PR review; the package linter itself remains standalone.
 
-Package authors can install this builder skill with `npx skills`:
+Package authors can install this builder skill globally for Codex with
+`npx skills`:
 
 ```bash
-npx skills add rahuldave/agent_skill_package_installer -a codex --skill skill-package-installer
+npx skills add rahuldave/agent_skill_package_installer -g -a codex --skill skill-package-maker -y
 ```
 
 Local verification:
@@ -53,6 +54,6 @@ just dependency-check . "/Users/rahul/Projects/agent_gest_git_skills/.agents/ski
 ```
 
 For concrete examples, see
-`skills/skill-package-installer/references/hello_world_rust_tutorial.md`. It
+`skills/skill-package-maker/references/hello_world_rust_tutorial.md`. It
 walks through a tiny `hello-rust` skill that depends on a Gest base skill family
 and a local Rust toolchain, plus an installer-skill pattern for hooks.

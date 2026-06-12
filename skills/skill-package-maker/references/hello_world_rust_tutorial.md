@@ -168,13 +168,13 @@ Create `skill-package.json`:
 From the example repo root, run static package lint:
 
 ```bash
-uv run python /path/to/agent_skill_package_installer/skills/skill-package-installer/scripts/lint_skill_bundle.py .
+uv run python /path/to/agent_skill_package_installer/skills/skill-package-maker/scripts/lint_skill_bundle.py .
 ```
 
 Check local executable prerequisites:
 
 ```bash
-uv run python /path/to/agent_skill_package_installer/skills/skill-package-installer/scripts/lint_skill_bundle.py --run-prereqs .
+uv run python /path/to/agent_skill_package_installer/skills/skill-package-maker/scripts/lint_skill_bundle.py --run-prereqs .
 ```
 
 Check Gest base skill dependencies using source checkouts or installed skill
@@ -182,7 +182,7 @@ roots:
 
 ```bash
 SKILL_PACKAGE_DEPENDENCY_PATHS="/Users/rahul/Projects/agent_gest_git_skills/.agents/skills:/Users/rahul/Projects/agent_gest_jj_skills/.agents/skills" \
-  uv run python /path/to/agent_skill_package_installer/skills/skill-package-installer/scripts/lint_skill_bundle.py --check-skill-deps .
+  uv run python /path/to/agent_skill_package_installer/skills/skill-package-maker/scripts/lint_skill_bundle.py --check-skill-deps .
 ```
 
 End users install the finished package with `npx skills`:

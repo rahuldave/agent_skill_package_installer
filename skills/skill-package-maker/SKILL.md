@@ -1,15 +1,16 @@
 ---
-name: skill-package-installer
+name: skill-package-maker
 description: Validate and package installable agent skill repositories. Use when Codex is creating, updating, publishing, or reviewing a skill repo with skills/*/SKILL.md or .agents/skills/*/SKILL.md, a skill-package.json manifest, installer scripts, optional extras, npx skills installation, or executable prerequisite checks.
 ---
 
-# Skill Package Installer
+# Skill Package Maker
 
 Use this authoring skill to make a skill repository installable and auditable
 before it is committed, pushed, or installed with `npx skills`. This skill is
-for package maintainers. End users of a finished package install that package
-directly and then invoke the package's own installer skill for hooks, templates,
-docs, tools, or other non-skill extras.
+for package maintainers, and it is reasonable to install it globally in Codex.
+End users of a finished package install that package directly and then invoke
+the package's own installer skill for hooks, templates, docs, tools, or other
+non-skill extras.
 
 ## Workflow
 
@@ -22,13 +23,13 @@ docs, tools, or other non-skill extras.
 3. Run the bundled linter from the installed skill or source checkout:
 
    ```bash
-   uv run python .agents/skills/skill-package-installer/scripts/lint_skill_bundle.py .
+   uv run python .agents/skills/skill-package-maker/scripts/lint_skill_bundle.py .
    ```
 
    If working from this repo, use:
 
    ```bash
-   uv run python skills/skill-package-installer/scripts/lint_skill_bundle.py .
+   uv run python skills/skill-package-maker/scripts/lint_skill_bundle.py .
    ```
 
 4. Fix blocking errors before publication. Warnings should be resolved or
@@ -36,7 +37,7 @@ docs, tools, or other non-skill extras.
 5. Emit a package plan when handing off or preparing a PR:
 
    ```bash
-   uv run python .agents/skills/skill-package-installer/scripts/render_package_plan.py .
+   uv run python .agents/skills/skill-package-maker/scripts/render_package_plan.py .
    ```
 
 ## Manifest Contract
