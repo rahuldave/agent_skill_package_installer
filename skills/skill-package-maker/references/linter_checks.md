@@ -21,6 +21,14 @@ Checks performed:
 - duplicate skill names are rejected;
 - hidden second-tier skill hierarchies under a skill folder are rejected;
 - markdown links to local references/scripts/assets from `SKILL.md` resolve;
+- backticked installed-skill references in `SKILL.md` use skill-local
+  `references/`, `scripts/`, or `assets/` paths rather than repo-root
+  `docs/`, `templates/`, or `tools/` paths;
+- skill-local `references/`, `scripts/`, and `assets/` path mentions from
+  `SKILL.md` resolve inside that skill folder;
+- Markdown links inside `references/*.md` resolve relative to the reference
+  file, so copied reference closures do not keep broken sibling links;
+- `references/*.md` files do not point back at repo-root `docs/*.md` paths;
 - copy installer scripts, when declared, exist and are executable or shell
   scripts;
 - copy installer scripts, when declared, report required executable
